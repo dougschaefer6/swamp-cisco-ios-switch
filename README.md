@@ -42,7 +42,7 @@ unreachable. Skip it for an offline dry run with `--skip-check-label live`.
 | `host` | | Management IP or hostname |
 | `port` | | SSH port (default 22) |
 | `username` | | A privilege-15 local user |
-| `password` | yes | `${{ vault.get(asei, <switch>-admin) }}` |
+| `password` | yes | `${{ vault.get(your-vault, <switch>-admin) }}` |
 | `enableSecret` | yes | Set **only** if the login does not land in privilege 15 |
 | `hostname` / `domainName` | | Asserted by `applyBaseline` |
 | `legacyAlgorithms` | | Append legacy SSH kex/cipher/host-key algorithms for old IOS (default true) |
@@ -56,15 +56,15 @@ unreachable. Skip it for an offline dry run with `--skip-check-label live`.
 type: "@dougschaefer/cisco-ios-switch"
 globalArguments:
   host: 10.20.0.10
-  username: asei-admin
-  password: ${{ vault.get(asei, sw-indy-mdf-admin) }}
-  hostname: SW-INDY-MDF-01
-  domainName: asei.local
+  username: switch-admin
+  password: ${{ vault.get(your-vault, switch-admin) }}
+  hostname: SW-CORE-01
+  domainName: corp.example.com
   snmp:
-    readOnly: ${{ vault.get(asei, sw-indy-mdf-snmp-ro) }}
-    readWrite: ${{ vault.get(asei, sw-indy-mdf-snmp-rw) }}
-    location: Indy MDF Rack 1
-    contact: noc@asei.com
+    readOnly: ${{ vault.get(your-vault, switch-snmp-ro) }}
+    readWrite: ${{ vault.get(your-vault, switch-snmp-rw) }}
+    location: Core IDF Rack 1
+    contact: noc@example.com
     trapHost: 10.20.0.50
   routing:
     enabled: true
@@ -81,24 +81,24 @@ globalArguments:
 
 ```bash
 # Create one definition per switch (or commit it as YAML — see above).
-swamp model create "@dougschaefer/cisco-ios-switch" sw-indy-mdf \
+swamp model create "@dougschaefer/cisco-ios-switch" sw-core \
   --global-arg host=10.20.0.10 \
-  --global-arg username=asei-admin \
-  --global-arg password='${{ vault.get(asei, sw-indy-mdf-admin) }}' \
-  --global-arg hostname=SW-INDY-MDF-01 \
-  --global-arg domainName=asei.local
+  --global-arg username=switch-admin \
+  --global-arg password='${{ vault.get(your-vault, switch-admin) }}' \
+  --global-arg hostname=SW-CORE-01 \
+  --global-arg domainName=corp.example.com
 
 # Review what would change without touching the switch (skip the live probe).
-swamp model method run sw-indy-mdf applyBaseline --input dryRun=true --skip-check-label live
+swamp model method run sw-core applyBaseline --input dryRun=true --skip-check-label live
 
 # Apply for real (the live reachability check runs first).
-swamp model method run sw-indy-mdf applyBaseline --input dryRun=false
-swamp model method run sw-indy-mdf pushSnmp     --input dryRun=false
-swamp model method run sw-indy-mdf pushRouting  --input dryRun=false
+swamp model method run sw-core applyBaseline --input dryRun=false
+swamp model method run sw-core pushSnmp     --input dryRun=false
+swamp model method run sw-core pushRouting  --input dryRun=false
 
 # Verify, then capture a redacted running-config.
-swamp model method run sw-indy-mdf runCommands --input 'commands=["show ip ssh","show ip route"]'
-swamp model method run sw-indy-mdf getRunningConfig
+swamp model method run sw-core runCommands --input 'commands=["show ip ssh","show ip route"]'
+swamp model method run sw-core getRunningConfig
 ```
 
 ## Transport notes
