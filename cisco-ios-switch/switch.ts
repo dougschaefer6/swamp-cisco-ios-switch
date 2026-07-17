@@ -39,7 +39,7 @@ import {
  */
 export const model = {
   type: "@dougschaefer/cisco-ios-switch",
-  version: "2026.06.29.1",
+  version: "2026.07.17.1",
   globalArguments: CiscoIosGlobalArgsSchema,
   resources: {
     status: {
